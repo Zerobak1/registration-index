@@ -1,47 +1,198 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Регистрация</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+        }
+        h1 {
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 26px;
+        }
+        .form-group {
+            margin-bottom: 22px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 15px;
+        }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: var(--light);
+        }
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+            background: white;
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+        button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(58, 12, 163, 0.15);
+        }
+        .alert {
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 24px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.4s;
+        }
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-  <h1>Регистрация</h1>
-  <form id="registration-form">
-    <label for="name">Имя:</label>
-    <input type="text" id="name" name="name" required>
+    <div class="card">
+        <h1>Регистрация участника</h1>
+        <form id="regForm">
+            <div class="form-group">
+                <label for="lastname">Фамилия</label>
+                <input type="text" id="lastname" name="lastname" required>
+            </div>
+            <div class="form-group">
+                <label for="firstname">Имя</label>
+                <input type="text" id="firstname" name="firstname" required>
+            </div>
+            <div class="form-group">
+                <label for="middlename">Отчество</label>
+                <input type="text" id="middlename" name="middlename">
+            </div>
+            <div class="form-group">
+                <label for="institution">Учебное заведение</label>
+                <input type="text" id="institution" name="institution" required>
+            </div>
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <div class="alert alert-success" id="successAlert">
+            Регистрация успешно завершена! ✓
+        </div>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('regForm');
+    const successAlert = document.getElementById('successAlert');
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
 
-    <label for="password">Пароль:</label>
-    <input type="password" id="password" name="password" required>
+        const formData = {
+            lastName: document.getElementById('lastname').value.trim(),
+            firstName: document.getElementById('firstname').value.trim(),
+            middleName: document.getElementById('middlename').value.trim(),
+            institution: document.getElementById('institution').value.trim()
+        };
 
-    <button type="submit">Зарегистрироваться</button>
-  </form>
+        // Валидация
+        if (!formData.lastName || !formData.firstName || !formData.institution) {
+            alert('Пожалуйста, заполните все обязательные поля');
+            return;
+        }
 
-  <script>
-    document.getElementById('registration-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
+        // Создаем iframe для обхода CORS
+        const iframe = document.createElement('iframe');
+        iframe.name = 'hidden-form-target';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
 
-      const formData = new FormData(e.target);
-      const data = {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        password: formData.get('password'),
-      };
+        // Создаем временную форму
+        const tempForm = document.createElement('form');
+        tempForm.action = 'https://script.google.com/macros/s/AKfycbw0wC8QggtjCpX5o3SDWeSUEOoAj8xaPi9g8IxDKLYX57NZMSCvG785jtDjJz3ebYHH/exec';
+        tempForm.method = 'POST';
+        tempForm.target = 'hidden-form-target';
+        tempForm.style.display = 'none';
 
-      const response = await fetch('https://script.google.com/macros/s/AKfycbwWIh49KBa7K4EhC1zilKYhphGx8tHeb7AszQSwOKne/exec', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+        // Добавляем поля
+        const addField = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            tempForm.appendChild(input);
+        };
 
-      if (response.ok) {
-        alert('Регистрация прошла успешно!');
-      } else {
-        alert('Ошибка при регистрации.');
-      }
+        addField('lastName', formData.lastName);
+        addField('firstName', formData.firstName);
+        addField('middleName', formData.middleName);
+        addField('institution', formData.institution);
+
+        document.body.appendChild(tempForm);
+        tempForm.submit();
+
+        // Показываем уведомление
+        successAlert.style.display = 'block';
+        form.reset();
+
+        // Удаляем элементы через 5 секунд
+        setTimeout(() => {
+            document.body.removeChild(tempForm);
+            document.body.removeChild(iframe);
+
+            // Открываем таблицу для проверки
+            window.open(
+                'https://docs.google.com/spreadsheets/d/1W_3-UN1e7GXdEveYAwzCU-UGHx85CJWaDCQxMNactOs/edit#gid=0',
+                '_blank'
+            );
+        }, 5000);
     });
-  </script>
+});
+</script>
 </body>
 </html>
